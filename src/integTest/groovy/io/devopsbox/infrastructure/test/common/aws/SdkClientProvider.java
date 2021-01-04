@@ -1,4 +1,4 @@
-package io.devopsbox.infrastructure.test.common;
+package io.devopsbox.infrastructure.test.common.aws;
 
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -9,14 +9,14 @@ import software.amazon.awssdk.services.s3.S3ClientBuilder;
 
 import java.net.URI;
 
-public class AwsSdkClientProvider {
+public class SdkClientProvider {
     public static final String LOCALSTACK_ENDPOINT = "http://localhost:4566";
     private final String awsRegion;
     private final boolean localstackEnabled;
 
     private S3Client s3Client;
 
-    public AwsSdkClientProvider(String awsRegion, boolean localstackEnabled) {
+    public SdkClientProvider(String awsRegion, boolean localstackEnabled) {
         this.awsRegion = awsRegion;
         this.localstackEnabled = localstackEnabled;
         this.s3Client = createS3Client();

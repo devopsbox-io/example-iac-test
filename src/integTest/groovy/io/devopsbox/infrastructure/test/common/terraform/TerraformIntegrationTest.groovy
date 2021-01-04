@@ -1,6 +1,7 @@
 package io.devopsbox.infrastructure.test.common.terraform
 
-import io.devopsbox.infrastructure.test.common.AwsSdkClientProvider
+import io.devopsbox.infrastructure.test.common.Localstack
+import io.devopsbox.infrastructure.test.common.aws.SdkClientProvider
 import org.apache.commons.io.FileUtils
 import spock.lang.Shared
 import spock.lang.Specification
@@ -16,19 +17,19 @@ abstract class TerraformIntegrationTest extends Specification {
     @Shared
     TerraformVariablesMarshaller terraformVariablesMarshaller
     @Shared
-    String localstackContainerName
+    SdkClientProvider sdkClients
     @Shared
-    AwsSdkClientProvider sdkClients
+    Localstack localstack
 
     def setupSpec() {
         terraform = new Terraform()
         terraformVariablesMarshaller = new TerraformVariablesMarshaller()
+        localstack = new Localstack()
         environment = UUID.randomUUID().toString()
 
-        def localstackEnabled = localstackEnabled()
-        sdkClients = new AwsSdkClientProvider(awsRegion(), localstackEnabled)
-        if (localstackEnabled) {
-            startLocalstack()
+        sdkClients = new SdkClientProvider(awsRegion(), localstack.enabled)
+        if (localstack.enabled) {
+            localstack.start()
         }
     }
 
@@ -41,8 +42,8 @@ abstract class TerraformIntegrationTest extends Specification {
     }
 
     void cleanupSpec() {
-        if (localstackEnabled()) {
-            stopLocalstack()
+        if (localstack.enabled) {
+            localstack.stop()
         }
     }
 
@@ -54,9 +55,6 @@ abstract class TerraformIntegrationTest extends Specification {
         return "eu-west-1"
     }
 
-    def localstackEnabled() {
-        return "true" == System.getProperty("localstack.enabled")
-    }
 
     protected void deployTerraformModule(String moduleDirPath, TerraformVariables terraformVariables) {
         FileUtils.copyDirectory(new File(moduleDirPath), new File(moduleTmpDir()))
@@ -79,26 +77,5 @@ abstract class TerraformIntegrationTest extends Specification {
 
     private moduleTmpDir() {
         return tmpDir.absolutePath + "/module"
-    }
-
-    private startLocalstack() {
-        localstackContainerName = "localstack-" + UUID.randomUUID().toString()
-        [
-                "docker",
-                "run",
-                "-p", "4566:4566",
-                "-e", "LOCALSTACK_SERVICES=s3",
-                "--name", localstackContainerName,
-                "localstack/localstack"
-        ].execute()
-    }
-
-    private stopLocalstack() {
-        [
-                "docker",
-                "rm",
-                "-f",
-                localstackContainerName,
-        ].execute()
     }
 }

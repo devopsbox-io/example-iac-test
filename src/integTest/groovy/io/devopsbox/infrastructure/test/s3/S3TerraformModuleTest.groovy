@@ -1,18 +1,26 @@
 package io.devopsbox.infrastructure.test.s3
 
+import io.devopsbox.infrastructure.test.common.aws.S3
 import io.devopsbox.infrastructure.test.common.terraform.TerraformIntegrationTest
 import io.devopsbox.infrastructure.test.common.terraform.TerraformVariables
 import org.apache.commons.codec.digest.DigestUtils
-import software.amazon.awssdk.services.s3.model.ListBucketsRequest
+import spock.lang.Shared
 import spock.lang.Unroll
 
 class S3TerraformModuleTest extends TerraformIntegrationTest {
+
+    @Shared
+    S3 s3
+
+    def setupSpec() {
+        s3 = new S3(sdkClients)
+    }
 
     @Unroll
     def "should create s3 bucket #testCase"() {
         given:
         def terraformVariables = new S3TerraformModuleVariables(
-                useLocalstack: localstackEnabled(),
+                useLocalstack: localstack.enabled,
                 awsRegion: awsRegion(),
                 companyName: "acme",
                 envName: environmentName(),
@@ -24,7 +32,7 @@ class S3TerraformModuleTest extends TerraformIntegrationTest {
         deployTerraformModule("terraform/s3", terraformVariables)
 
         then:
-        checkBucketExists(expectedBucketName)
+        s3.checkBucketExists(expectedBucketName)
 
         cleanup:
         destroyTerraformModule("terraform/s3", terraformVariables)
@@ -42,12 +50,5 @@ class S3TerraformModuleTest extends TerraformIntegrationTest {
         String envName
         String appName
         String bucketPurpose
-    }
-
-    void checkBucketExists(String name) {
-        def listBucketsResponse = sdkClients.s3Client.listBuckets(ListBucketsRequest.builder()
-                .build())
-
-        assert listBucketsResponse.buckets().any { name.equals(it.name()) }
     }
 }

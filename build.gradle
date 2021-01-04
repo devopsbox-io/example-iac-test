@@ -1,7 +1,9 @@
 plugins {
     id 'java'
     id 'groovy'
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
     id 'nebula.integtest' version '7.0.9'
+    id 'application'
 }
 
 repositories {
@@ -13,11 +15,12 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'commons-codec:commons-codec:1.15'
+    implementation 'software.amazon.awscdk:core:1.71.0'
+    implementation 'software.amazon.awscdk:s3:1.71.0'
 
     testImplementation 'org.spockframework:spock-core:1.3-groovy-2.5'
     testImplementation 'software.amazon.awssdk:s3:2.14.12'
     testImplementation 'commons-io:commons-io:2.8.0'
-
 }
 
 group = 'io.devopsbox.infrastructure.test'
@@ -26,6 +29,15 @@ version = '0.1'
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+application {
+    mainClassName = 'io.devopsbox.infrastructure.test.IacTestApp'
+}
+
+task startCdkTest(type:JavaExec) {
+    main = "io.devopsbox.infrastructure.test.common.cdk.CdkIntegrationTestMain"
+    classpath = sourceSets.integTest.runtimeClasspath
 }
 
 integrationTest {
