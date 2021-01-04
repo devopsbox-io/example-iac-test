@@ -1,1 +1,17 @@
+.classpath.txt
+target
+.classpath
+.project
 .idea
+.settings
+.vscode
+*.iml
+.gradle
+build
+out
+.cdk.staging
+cdk.out
+.terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
