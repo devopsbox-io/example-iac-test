@@ -27,3 +27,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
 }
+
+integrationTest {
+    systemProperty "localstack.enabled", System.getProperty("localstack.enabled")
+}

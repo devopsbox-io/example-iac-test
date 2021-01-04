@@ -17,3 +17,8 @@ variable "app_name" {
 variable "bucket_purpose" {
   type = string
 }
+
+variable "use_localstack" {
+  type = bool
+  default = false
+}
